@@ -1,0 +1,395 @@
+{
+  "info": {
+    "_postman_id": "4d92c47c-6a4f-4529-a82c-b87946075cf3",
+    "name": "DummyJSON - Auth + Products CRUD",
+    "description": "Colección para probar login con DummyJSON y CRUD de productos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "14374974"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (POST /auth/login) -> set tokens",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login responde 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', data.accessToken || '');",
+                  "pm.collectionVariables.set('refreshToken', data.refreshToken || '');",
+                  "pm.collectionVariables.set('userId', String(data.id || ''));",
+                  "pm.test('accessToken presente', function () {",
+                  "  pm.expect(pm.collectionVariables.get('accessToken')).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"expiresInMins\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Auth User (GET /auth/me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('auth/me responde 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const me = pm.response.json();",
+                  "pm.test('Usuario autenticado tiene id', function () {",
+                  "  pm.expect(me.id).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products (GET /products)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista de productos 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "pm.test('Tiene arreglo products', function () {",
+                  "  pm.expect(res.products).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?limit=10&skip=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "skip",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Product (POST /products/add) -> set lastProductId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Add product 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const p = pm.response.json();",
+                  "pm.collectionVariables.set('lastProductId', String(p.id || ''));",
+                  "pm.test('Se guardó lastProductId', function () {",
+                  "  pm.expect(pm.collectionVariables.get('lastProductId')).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"BMW Pencil\",\n  \"price\": 9.99,\n  \"category\": \"stationery\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product (PUT /products/{{productId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PUT product 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const p = pm.response.json();",
+                  "pm.test('Título actualizado', function () {",
+                  "  pm.expect(p.title).to.eql('iPhone Galaxy +1');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"iPhone Galaxy +1\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/{{productId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Partial Update Product (PATCH /products/{{productId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('PATCH product 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const p = pm.response.json();",
+                  "pm.test('Precio actualizado', function () {",
+                  "  pm.expect(p.price).to.eql(199.99);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 199.99\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/{{productId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product (DELETE /products/{{productId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('DELETE product 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const p = pm.response.json();",
+                  "pm.test('Marcado como eliminado', function () {",
+                  "  pm.expect(p.isDeleted).to.be.true;",
+                  "  pm.expect(p).to.have.property('deletedOn');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{productId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product (DELETE /products/{{lastProductId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('DELETE lastProductId 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const p = pm.response.json();",
+                  "pm.test('Marcado como eliminado (lastProductId)', function () {",
+                  "  pm.expect(p.isDeleted).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{lastProductId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{lastProductId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://dummyjson.com"
+    },
+    {
+      "key": "username",
+      "value": "emilys"
+    },
+    {
+      "key": "password",
+      "value": "emilyspass"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": "1"
+    },
+    {
+      "key": "lastProductId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    }
+  ]
+}
